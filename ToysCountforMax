@@ -1,0 +1,93 @@
+package com.pac;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+class ToysCountforMax {
+
+	public static void main(String[] args) {
+		
+		// Price of toys
+		int toysPrice[] = { 5, 1, 3, 2, 8 };
+
+		Map<Integer, String> toyNamePriceMap= new HashMap<Integer, String>();
+		
+		toyNamePriceMap.put(toysPrice[0],"A");
+		toyNamePriceMap.put(toysPrice[1],"B");
+		toyNamePriceMap.put(toysPrice[2],"C");
+		toyNamePriceMap.put(toysPrice[3],"D");
+		toyNamePriceMap.put(toysPrice[4],"E");
+
+		int toysAvailable[] = new int[toysPrice.length];
+		
+		try (Scanner sc = new Scanner(System.in)) {
+			
+			//User input//5,4,7,8,3
+			System.out.print("Enter Toys availability in shop for A B C D E :: ");
+			for (int i = 0; i < toysPrice.length; i++) {
+				toysAvailable[i] = sc.nextInt();
+			}
+			System.out.print("Enter the payable amount :: ");//45
+			int amount = sc.nextInt();
+			
+			//Sort needed for max count of toys//{1=1, 3=2, 2=3, 0=5, 4=8}
+			Map<Integer, Integer> toysPriceMap = createMap(toysPrice, true); 
+			//Map needed to get available toys//{0=5, 1=4, 2=7, 3=8, 4=3}
+			Map<Integer, Integer> toysAvailableMap = createMap(toysAvailable, false); 
+			
+			//Initializing
+			int sum = 0, purchaseQuantity = 0 ;
+			int price , quantity, newQuantity, tempAmount;
+			Map.Entry<Integer, Integer> priceEntry;
+			
+			//Logic
+			Iterator<Map.Entry<Integer, Integer>> priceMapIterator = toysPriceMap.entrySet().iterator();
+			
+			while (priceMapIterator.hasNext()) {
+				priceEntry = priceMapIterator.next();
+				
+				price = priceEntry.getValue();
+				quantity = toysAvailableMap.get(priceEntry.getKey());
+				tempAmount = price * quantity;
+				
+				if (sum + tempAmount <= amount) 
+				{
+					purchaseQuantity = purchaseQuantity + quantity;
+					System.out.println("quantity "+ quantity+ "of "+toyNamePriceMap.get(price)+" for price of "+price);
+				}
+				else {
+					newQuantity = (amount - sum) / price;
+					tempAmount = price * newQuantity;
+					purchaseQuantity = purchaseQuantity + newQuantity;
+					System.out.println("quantity "+ newQuantity+ "of "+toyNamePriceMap.get(price)+" for price of "+price);
+				}
+				sum = sum + tempAmount;
+				if(sum == amount || tempAmount == 0) {
+					break;
+				}
+			}
+			
+			System.out.println("Maximum quantity of toys can be purchased :: " + purchaseQuantity);
+		}
+	}
+
+	private static Map<Integer, Integer> createMap(int[] input, boolean isSortRequired) {
+
+		Map<Integer, Integer> opMap = new HashMap<>();
+		for (int i = 0; i < input.length; i++)
+			opMap.put(i, input[i]);
+
+		if (isSortRequired) {
+			Map<Integer, Integer> opMapSort = opMap.entrySet()
+					.stream().sorted(Map.Entry.comparingByValue())
+					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, 
+							(e1, e2) -> e2, LinkedHashMap::new));
+			return opMapSort;
+		}
+		return opMap;
+	}
+}
